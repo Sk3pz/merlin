@@ -6,3 +6,11 @@ authors = ["Eric (Sk3pz) <skepz.dev@gmail.com>"]
 description = "A simple 2d fighter jet game written in rust with macroquad"
 
 [dependencies]
+serde = { version = "*", features = ["derive"] }
+serde_json = "*"
+include_assets = "*"
+better_term = "*"
+
+[dependencies.macroquad]
+version = "*"
+features = ["audio", "default"]
