@@ -1,0 +1,8 @@
+[package]
+name = "merlin"
+version = "0.1.0"
+edition = "2021"
+authors = ["Eric (Sk3pz) <skepz.dev@gmail.com>"]
+description = "A simple 2d fighter jet game written in rust with macroquad"
+
+[dependencies]
