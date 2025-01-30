@@ -2,7 +2,10 @@ use std::time::Duration;
 
 use macroquad::{math::{vec2, Vec2}, window::{screen_height, screen_width}};
 
-use crate::aircraft::{Aircraft, AircraftType};
+use crate::{aircraft::{Aircraft, AircraftType}, info};
+
+// for edge detection
+const EDGE_BOUNDS: f32 = 30.0;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum PlayerState {
@@ -16,12 +19,12 @@ pub struct Player {
     pub pos: Vec2,
     pub rotation: f32,
 
-    pub turn_rate: f32,
+    pub turn_rate: f32, // TODO: broken :/ (reimplement calculation on airplane)
     pub speed: f32,
     pub throttle_percent: f32,
 
     pub health: u32,
-    pub airbrake: bool,
+    pub airbrake: bool, // TODO: broken :/
 
     pub aircraft: Aircraft,
 
@@ -103,19 +106,18 @@ impl Player {
         let velocity = (direction * self.speed) * vec2(0.002, -0.002);
         self.pos += velocity * delta_time;
 
-        let edge_bounds = 30.0;
-
-        // teleport when at edges
-        if self.pos.x > screen_width() + edge_bounds {
-            self.pos.x = -edge_bounds;
-        } else if self.pos.x < -edge_bounds {
-            self.pos.x = screen_width() + edge_bounds;
+        // teleport when at edges TODO: this is not working properly for some reason
+        if self.pos.x > screen_width() + EDGE_BOUNDS {
+            self.pos.x = -EDGE_BOUNDS;
+        } else if self.pos.x < -EDGE_BOUNDS {
+            self.pos.x = screen_width() + EDGE_BOUNDS;
         }
         
-        if self.pos.y > screen_height() + edge_bounds {
-            self.pos.y = -edge_bounds;
-        } else if self.pos.y < -edge_bounds {
-            self.pos.y = screen_height() + edge_bounds;
+        if self.pos.y > screen_height() + EDGE_BOUNDS {
+            self.pos.y = -EDGE_BOUNDS;
+        } else if self.pos.y < -EDGE_BOUNDS {
+            info!("y is at {}", self.pos.y);
+            self.pos.y = screen_height() + EDGE_BOUNDS;
         }
     }
 

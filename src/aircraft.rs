@@ -136,11 +136,17 @@ impl Aircraft {
 
     pub fn calc_turn_rate(&self, speed: f32) -> f32 {
         // dark magic with linear regression (I dont understand this)
-        if speed < self.turn_flip_point {
-            return self.base_turn_rate + (self.max_turn_rate - self.base_turn_rate) * (speed / self.turn_flip_point);
+        let midpoint = self.turn_flip_point;
+        let base_turn_rate = self.base_turn_rate;
+
+        let turn_rate = if speed <= midpoint {
+            base_turn_rate + (midpoint - speed) * (base_turn_rate / 150.0)
         } else {
-            return self.max_turn_rate - (self.max_turn_rate - self.min_turn_rate) * ((speed - self.turn_flip_point) / (self.stall_speed - self.turn_flip_point));
-        }
+            base_turn_rate - (speed - midpoint) * (base_turn_rate / 150.0)
+        };
+
+        // clamp to the aircraft's abilities
+        self.min_turn_rate.max(turn_rate.min(self.max_turn_rate))
     }
 
     // calculate acceleration based on throttle percentage, speed, drag and etc

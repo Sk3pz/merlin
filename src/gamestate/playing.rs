@@ -9,7 +9,7 @@ use super::{GameState, GameStateAction, GameStateError};
 pub const THROTTLE_INCREMENTATION: f32 = 1.0;
 
 // TODO: make this a setting
-pub const AIRBRAKE_TOGGLE: bool = false;
+pub const AIRBRAKE_TOGGLE: bool = true;
 
 #[derive(Clone)]
 pub struct PlayingGS {
@@ -44,14 +44,10 @@ impl GameState for PlayingGS {
 
         // handle input and make the player respond accordingly
         let actions = self.control_handler.get_actions_down();
-        let mut is_turning = false;
-        let mut throttle_up_pressed = false;
-        let mut airbrake_pressed = false;
         // handle various movement types
         for action in actions {
             match action {
                 Action::ThrottleUp => {
-                    throttle_up_pressed = true;
                     self.player.set_throttle(self.player.throttle_percent + THROTTLE_INCREMENTATION);
                     if self.player.throttle_percent > 100.0 {
                         self.player.set_throttle(110.0);
@@ -67,7 +63,6 @@ impl GameState for PlayingGS {
                     if self.player.state == PlayerState::TurningRight {
                         self.player.state = PlayerState::Normal;
                     } else {
-                        is_turning = true;
                         self.player.apply_action(PlayerState::TurningLeft);
                     }
                 }
@@ -75,26 +70,16 @@ impl GameState for PlayingGS {
                     if self.player.state == PlayerState::TurningLeft {
                         self.player.state = PlayerState::Normal;
                     } else {
-                        is_turning = true;
                         self.player.apply_action(PlayerState::TurningRight);
                     }
                 }
                 Action::Airbrake => {
-                    self.player.airbrake = true;
-                    airbrake_pressed = true;
+                    if !AIRBRAKE_TOGGLE {
+                        self.player.airbrake = true;
+                    }
                 }
                 _ => {}
             }
-        }
-
-        if !is_turning {
-            self.player.apply_action(PlayerState::Normal);
-        }
-        if !throttle_up_pressed {
-            self.player.set_throttle(self.player.throttle_percent.min(100.0));
-        }
-        if !airbrake_pressed {
-            self.player.airbrake = false;
         }
 
         // update the player
@@ -106,6 +91,28 @@ impl GameState for PlayingGS {
             match action {
                 Action::Pause => {
                     return Ok(GameStateAction::ChangeState(Box::new(super::pause::PauseGS::new(self.clone()))))
+                }
+                Action::ThrottleUp => {
+                    if self.player.throttle_percent > 100.0 {
+                        self.player.throttle_percent = 100.0;
+                    }
+                }
+                Action::RollLeft => {
+                    if self.player.state != PlayerState::TurningRight {
+                        self.player.apply_action(PlayerState::Normal);
+                    }
+                }
+                Action::RollRight => {
+                    if self.player.state != PlayerState::TurningLeft {
+                        self.player.apply_action(PlayerState::Normal);
+                    }
+                }
+                Action::Airbrake => {
+                    if AIRBRAKE_TOGGLE {
+                        self.player.airbrake = !self.player.airbrake;
+                    } else {
+                        self.player.airbrake = false;
+                    }
                 }
                 _ => {}
             }
@@ -133,7 +140,7 @@ impl GameState for PlayingGS {
         draw_text(&format!("FPS:      {}", fps.round()),                        2.0, 12.0 * 1.0, 20.0, BLACK);
         draw_text(&format!("THROTTLE: {}", self.player.throttle_percent),       2.0, 12.0 * 2.0, 20.0, BLACK);
         draw_text(&format!("HEALTH:   {}", self.player.health),                 2.0, 12.0 * 3.0, 20.0, BLACK);
-        draw_text(&format!("AIRBRAKE: {}", self.player.airbrake),                 2.0, 12.0 * 4.0, 20.0, BLACK);
+        draw_text(&format!("AIRBRAKE: {}", self.player.airbrake),               2.0, 12.0 * 4.0, 20.0, BLACK);
         draw_text(&format!("SPEED:    {}", self.player.speed),                  2.0, 12.0 * 5.0, 20.0, BLACK);
         draw_text(&format!("ACCL:     {}", self.player.get_acceleration()),     2.0, 12.0 * 6.0, 20.0, BLACK);
         draw_text(&format!("T-RATE:   {}", self.player.turn_rate),              2.0, 12.0 * 7.0, 20.0, BLACK);
