@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+use std::fmt::Display;
+use std::{collections::HashMap, fmt::Formatter};
 use std::path::Path;
 use macroquad::input::{is_key_down, is_key_released, is_mouse_button_down, is_mouse_button_released, KeyCode, MouseButton};
 use serde::{Deserialize, Serialize};
@@ -14,6 +15,21 @@ pub enum Action {
     FireMissile,
     
     Pause,
+}
+
+impl Display for Action {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Action::RollLeft => write!(f, "Roll Left"),
+            Action::RollRight => write!(f, "Roll Right"),
+            Action::ThrottleUp => write!(f, "Throttle Up"),
+            Action::ThrottleDown => write!(f, "Throttle Down"),
+            Action::Airbrake => write!(f, "Airbrake"),
+            Action::FireGun => write!(f, "Fire Gun"),
+            Action::FireMissile => write!(f, "Fire Missile"),
+            Action::Pause => write!(f, "Pause"),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, Deserialize, Serialize)]
@@ -165,6 +181,7 @@ impl ControlHandler {
 }
 
 impl Default for ControlHandler {
+    // NOTE: When adding new controls, delete ./data/controls.dat to regenerate the file with the new controls
     fn default() -> Self {
         let mut bindings = HashMap::new();
         

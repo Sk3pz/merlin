@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use macroquad::{math::{vec2, Vec2}, window::{screen_height, screen_width}};
 
-use crate::{aircraft::{Aircraft, AircraftType}, info};
+use crate::aircraft::{Aircraft, AircraftType};
 
 // for edge detection
 const EDGE_BOUNDS: f32 = 30.0;
@@ -19,12 +19,12 @@ pub struct Player {
     pub pos: Vec2,
     pub rotation: f32,
 
-    pub turn_rate: f32, // TODO: broken :/ (reimplement calculation on airplane)
+    pub turn_rate: f32,
     pub speed: f32,
     pub throttle_percent: f32,
 
     pub health: u32,
-    pub airbrake: bool, // TODO: broken :/
+    pub airbrake: bool,
 
     pub aircraft: Aircraft,
 
@@ -116,7 +116,6 @@ impl Player {
         if self.pos.y > screen_height() + EDGE_BOUNDS {
             self.pos.y = -EDGE_BOUNDS;
         } else if self.pos.y < -EDGE_BOUNDS {
-            info!("y is at {}", self.pos.y);
             self.pos.y = screen_height() + EDGE_BOUNDS;
         }
     }

@@ -9,7 +9,7 @@ use super::{GameState, GameStateAction, GameStateError};
 pub const THROTTLE_INCREMENTATION: f32 = 1.0;
 
 // TODO: make this a setting
-pub const AIRBRAKE_TOGGLE: bool = true;
+pub const AIRBRAKE_TOGGLE: bool = false;
 
 #[derive(Clone)]
 pub struct PlayingGS {
@@ -137,15 +137,29 @@ impl GameState for PlayingGS {
         );
 
         // draw the FPS counter in the top right
-        draw_text(&format!("FPS:      {}", fps.round()),                        2.0, 12.0 * 1.0, 20.0, BLACK);
-        draw_text(&format!("THROTTLE: {}", self.player.throttle_percent),       2.0, 12.0 * 2.0, 20.0, BLACK);
-        draw_text(&format!("HEALTH:   {}", self.player.health),                 2.0, 12.0 * 3.0, 20.0, BLACK);
-        draw_text(&format!("AIRBRAKE: {}", self.player.airbrake),               2.0, 12.0 * 4.0, 20.0, BLACK);
-        draw_text(&format!("SPEED:    {}", self.player.speed),                  2.0, 12.0 * 5.0, 20.0, BLACK);
-        draw_text(&format!("ACCL:     {}", self.player.get_acceleration()),     2.0, 12.0 * 6.0, 20.0, BLACK);
-        draw_text(&format!("T-RATE:   {}", self.player.turn_rate),              2.0, 12.0 * 7.0, 20.0, BLACK);
-        draw_text(&format!("DRAG:     {}", self.player.get_drag_coefficient()), 2.0, 12.0 * 8.0, 20.0, BLACK);
-        draw_text(&format!("THRUST:   {}", self.player.get_thrust()),           2.0, 12.0 * 9.0, 20.0, BLACK);
+        draw_text(&format!("FPS:      {}",      fps.round()),                        2.0, 12.0 * 1.0, 20.0, BLACK);
+        // -- blank space
+        let throttle_color = if self.player.throttle_percent > 100.0 {
+            Color::from_rgba(200, 50, 50, 255)
+        } else {
+            WHITE
+        };
+        draw_text(&format!("THROTTLE: {}%",     self.player.throttle_percent),       2.0, 12.0 * 3.0, 20.0, throttle_color);
+        draw_text(&format!("AIRBRAKE: {}",      self.player.airbrake),               2.0, 12.0 * 4.0, 20.0, WHITE);
+        draw_text(&format!("HEALTH:   {}",      self.player.health),                 2.0, 12.0 * 5.0, 20.0, WHITE);
+        let speed = (self.player.speed * 1.94384).round(); // convert m/s to knots
+        draw_text(&format!("SPEED:    {}kts",   speed),                              2.0, 12.0 * 6.0, 20.0, WHITE);
+        // -- blank space
+        // round the acceleration to 2 decimal places
+        let rounded_acc = (self.player.get_acceleration() * 100.0).round();
+        draw_text(&format!("ACCL:     {}m/s^2", rounded_acc),                        2.0, 12.0 * 8.0, 20.0, WHITE);
+        // round the turn rate to 2 decimal places
+        let rounded_turn_rate = (self.player.turn_rate * 100.0).round();
+        draw_text(&format!("T-RATE:   {}DEG/s", rounded_turn_rate),              2.0, 12.0 * 9.0, 20.0, WHITE);
+        let drag = (self.player.get_drag_coefficient() * 100.0).round();
+        draw_text(&format!("DRAG:     {}LBS",   drag), 2.0, 12.0 * 10.0, 20.0, WHITE);
+        let thrust = self.player.get_thrust().round();
+        draw_text(&format!("THRUST:   {}LBS",  thrust),                             2.0, 12.0 * 11.0, 20.0, WHITE);
 
         Ok(())
     }
